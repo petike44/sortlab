@@ -21,20 +21,22 @@ export function Visualizer({ array, message }: VisualizerProps) {
       </div>
 
       {/* Visualization Area */}
-      <div className="flex-1 bg-gray-900 border-2 border-t-0 border-gray-800 rounded-b-2xl p-8 flex items-end gap-[1px] min-h-[600px]">
+      <div className="flex-1 bg-gray-900 border-2 border-t-0 border-gray-800 rounded-b-2xl p-6 flex items-end justify-center gap-1 min-h-[600px]">
         {array.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-gray-500 text-lg">Initializing...</div>
           </div>
         ) : (
-          array.map((item, index) => (
-            <Bar
-              key={item.id}
-              item={item}
-              maxValue={maxValue}
-              index={index}
-            />
-          ))
+          <div className="w-full h-full flex items-end justify-center gap-1">
+            {array.map((item, index) => (
+              <Bar
+                key={item.id}
+                item={item}
+                maxValue={maxValue}
+                index={index}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

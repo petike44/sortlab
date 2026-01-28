@@ -21,12 +21,15 @@ export function Bar({ item, maxValue, index }: BarProps) {
 
   return (
     <div
-      className="flex-1 flex flex-col items-center justify-end transition-all duration-200 ease-out"
-      style={{ minWidth: '2px' }}
+      className="flex-1 flex flex-col items-center justify-end"
+      style={{ minWidth: '8px' }}
     >
       <div
-        className={`w-full ${colorClass} transition-all duration-200 ease-out rounded-t hover:opacity-90`}
-        style={{ height: `${heightPercentage}%` }}
+        className={`w-full ${colorClass} transition-all duration-100 ease-out rounded-sm`}
+        style={{ 
+          height: `${heightPercentage}%`,
+          minHeight: '4px'
+        }}
         title={`${item.value}`}
       />
     </div>
