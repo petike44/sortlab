@@ -22,21 +22,21 @@ export function Visualizer({ array, message, visualizationMode, onVisualizationM
   return (
     <div className="w-full h-full flex flex-col">
       {/* Top Bar with Visualization Mode Selector */}
-      <div className="px-6 py-4 bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-t-2xl shadow-lg flex items-center justify-between gap-4">
+      <div className="px-3 sm:px-6 py-3 sm:py-4 bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-t-xl sm:rounded-t-2xl shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
         {/* Message */}
-        <p className="text-sm text-gray-300 font-medium flex-1">
-          {message || 'Select an algorithm and press Play to start'}
+        <p className="text-xs sm:text-sm text-gray-300 font-medium flex-1 order-2 sm:order-1">
+          {message || 'Press Play to start'}
         </p>
         
         {/* Visualization Mode Selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">View:</span>
+        <div className="flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto justify-end">
+          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold hidden sm:inline">View:</span>
           <div className="flex gap-1 bg-gray-800/80 rounded-lg p-1">
             {VISUALIZATION_MODES.map((mode) => (
               <button
                 key={mode.id}
                 onClick={() => onVisualizationModeChange(mode.id)}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                className={`px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-1.5 ${
                   visualizationMode === mode.id
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
@@ -52,33 +52,33 @@ export function Visualizer({ array, message, visualizationMode, onVisualizationM
       </div>
 
       {/* Color Legend - Inline */}
-      <div className="px-6 py-2 bg-gray-800/40 border-x border-gray-700/50 flex items-center justify-center gap-6">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-gray-500 rounded" />
-          <span className="text-xs text-gray-400">Default</span>
+      <div className="px-3 sm:px-6 py-1.5 sm:py-2 bg-gray-800/40 border-x border-gray-700/50 flex items-center justify-center gap-3 sm:gap-6 flex-wrap">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-gray-500 rounded" />
+          <span className="text-[10px] sm:text-xs text-gray-400">Default</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-blue-500 rounded" />
-          <span className="text-xs text-gray-400">Comparing</span>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-500 rounded" />
+          <span className="text-[10px] sm:text-xs text-gray-400">Comparing</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-500 rounded" />
-          <span className="text-xs text-gray-400">Swapping</span>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded" />
+          <span className="text-[10px] sm:text-xs text-gray-400">Swapping</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500 rounded" />
-          <span className="text-xs text-gray-400">Sorted</span>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded" />
+          <span className="text-[10px] sm:text-xs text-gray-400">Sorted</span>
         </div>
       </div>
 
       {/* Visualization Area */}
-      <div className={`flex-1 bg-gray-900/60 backdrop-blur-xl border border-t-0 border-gray-700/50 rounded-b-2xl p-8 flex items-${visualizationMode === 'boxes' ? 'center' : 'end'} justify-center gap-${visualizationMode === 'boxes' ? '3' : '1'} min-h-[500px] shadow-2xl shadow-blue-500/5`}>
+      <div className={`flex-1 bg-gray-900/60 backdrop-blur-xl border border-t-0 border-gray-700/50 rounded-b-xl sm:rounded-b-2xl p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-[250px] sm:min-h-[350px] lg:min-h-[500px] shadow-2xl shadow-blue-500/5`}>
         {array.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-gray-400 text-lg">Initializing...</div>
           </div>
         ) : (
-          <div className={`w-full h-full flex items-${visualizationMode === 'boxes' ? 'center' : 'end'} justify-center ${visualizationMode === 'boxes' ? 'flex-wrap gap-3' : 'gap-1'}`}>
+          <div className={`w-full flex items-end justify-center ${visualizationMode === 'boxes' ? 'flex-wrap gap-2 sm:gap-3 items-center' : 'gap-0.5 sm:gap-1 h-[200px] sm:h-[300px] lg:h-[400px]'}`}>
             {array.map((item, index) => (
               <Bar
                 key={item.id}
