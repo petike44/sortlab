@@ -29,16 +29,16 @@ export function Controls({
   const currentAlgo = ALGORITHMS[algorithm];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-7">
       {/* Algorithm Selection */}
       <div className="space-y-3">
-        <label className="block text-sm font-semibold text-gray-400 uppercase tracking-wide">
+        <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wide">
           Algorithm
         </label>
         <select
           value={algorithm}
           onChange={(e) => onAlgorithmChange(e.target.value as SortingAlgorithm)}
-          className="w-full px-4 py-4 bg-gray-800 border-2 border-gray-700 rounded-xl text-white text-base font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer disabled:opacity-50"
+          className="w-full px-4 py-3.5 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white text-base font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer disabled:opacity-50 hover:bg-gray-800/70 shadow-lg"
           disabled={playback.isPlaying}
         >
           {Object.values(ALGORITHMS).map((algo) => (
@@ -47,21 +47,21 @@ export function Controls({
             </option>
           ))}
         </select>
+        <p className="text-sm text-gray-400 leading-relaxed">{currentAlgo.description}</p>
       </div>
 
       {/* Algorithm Info */}
-      <div className="p-6 bg-gray-800 rounded-xl border border-gray-700">
-        <p className="text-sm text-gray-300 leading-relaxed mb-4">{currentAlgo.description}</p>
-        <div className="flex gap-6 text-sm">
+      <div className="bg-gray-800/40 rounded-xl p-5 border border-gray-700/50">
+        <div className="flex gap-8 text-sm">
           <div>
-            <div className="text-gray-500 mb-1">Time Complexity</div>
-            <div className="text-blue-400 font-mono font-semibold text-base">
+            <div className="text-gray-400 mb-1 text-xs uppercase tracking-wide">Time Complexity</div>
+            <div className="text-blue-400 font-mono font-bold text-base">
               {currentAlgo.timeComplexity.average}
             </div>
           </div>
           <div>
-            <div className="text-gray-500 mb-1">Space</div>
-            <div className="text-blue-400 font-mono font-semibold text-base">
+            <div className="text-gray-400 mb-1 text-xs uppercase tracking-wide">Space</div>
+            <div className="text-blue-400 font-mono font-bold text-base">
               {currentAlgo.spaceComplexity}
             </div>
           </div>
@@ -71,10 +71,10 @@ export function Controls({
       {/* Array Size */}
       <div className="space-y-3">
         <div className="flex justify-between items-baseline">
-          <label className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+          <label className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
             Array Size
           </label>
-          <span className="text-xl font-bold text-blue-500">{arraySize}</span>
+          <span className="text-2xl font-bold text-blue-500">{arraySize}</span>
         </div>
         <input
           type="range"
@@ -82,7 +82,7 @@ export function Controls({
           max="100"
           value={arraySize}
           onChange={(e) => onArraySizeChange(parseInt(e.target.value))}
-          className="w-full h-2 bg-gray-800 rounded-full appearance-none cursor-pointer accent-blue-500 disabled:opacity-50"
+          className="w-full h-2 bg-gray-800/50 rounded-full appearance-none cursor-pointer accent-blue-500 disabled:opacity-50"
           disabled={playback.isPlaying}
         />
       </div>
@@ -90,10 +90,10 @@ export function Controls({
       {/* Speed Control */}
       <div className="space-y-3">
         <div className="flex justify-between items-baseline">
-          <label className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+          <label className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
             Speed
           </label>
-          <span className="text-xl font-bold text-blue-500">{playback.speed}%</span>
+          <span className="text-2xl font-bold text-blue-500">{playback.speed}%</span>
         </div>
         <input
           type="range"
@@ -101,7 +101,7 @@ export function Controls({
           max="100"
           value={playback.speed}
           onChange={(e) => onSpeedChange(parseInt(e.target.value))}
-          className="w-full h-2 bg-gray-800 rounded-full appearance-none cursor-pointer accent-blue-500"
+          className="w-full h-2 bg-gray-800/50 rounded-full appearance-none cursor-pointer accent-blue-500"
         />
       </div>
 
@@ -109,10 +109,10 @@ export function Controls({
       <div className="space-y-4">
         <button
           onClick={onTogglePlayback}
-          className={`w-full px-6 py-5 rounded-xl font-bold text-lg transition-all ${
+          className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all shadow-lg ${
             playback.isPlaying
-              ? 'bg-red-600 hover:bg-red-700 text-white'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
+              ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-red-500/30'
+              : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/30'
           }`}
         >
           {playback.isPlaying ? '⏸ Pause' : '▶ Play'}
@@ -121,14 +121,14 @@ export function Controls({
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={onStepBackward}
-            className="px-4 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed border-2 border-gray-700"
+            className="px-4 py-3.5 bg-gray-800/50 hover:bg-gray-700/60 text-white rounded-xl font-semibold text-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-gray-700/50 shadow-lg"
             disabled={playback.isPlaying || playback.currentStep === 0}
           >
             ← Back
           </button>
           <button
             onClick={onStepForward}
-            className="px-4 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed border-2 border-gray-700"
+            className="px-4 py-3.5 bg-gray-800/50 hover:bg-gray-700/60 text-white rounded-xl font-semibold text-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-gray-700/50 shadow-lg"
             disabled={playback.isPlaying || playback.currentStep >= playback.totalSteps}
           >
             Forward →
@@ -137,7 +137,7 @@ export function Controls({
 
         <button
           onClick={onReset}
-          className="w-full px-6 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed border-2 border-gray-700"
+          className="w-full px-5 py-3.5 bg-gray-800/50 hover:bg-gray-700/60 text-white rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-gray-700/50 shadow-lg"
           disabled={playback.isPlaying}
         >
           ↻ Reset
@@ -147,14 +147,14 @@ export function Controls({
       {/* Progress */}
       <div className="space-y-3">
         <div className="flex justify-between items-baseline">
-          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wide">Progress</span>
+          <span className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Progress</span>
           <span className="text-sm font-mono text-gray-400">
             {playback.currentStep} / {playback.totalSteps}
           </span>
         </div>
-        <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+        <div className="w-full bg-gray-800/50 rounded-full h-2.5 overflow-hidden shadow-inner">
           <div
-            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-300 shadow-lg shadow-blue-500/50"
             style={{
               width: `${playback.totalSteps > 0 ? (playback.currentStep / playback.totalSteps) * 100 : 0}%`
             }}
@@ -163,24 +163,24 @@ export function Controls({
       </div>
 
       {/* Legend */}
-      <div className="p-6 bg-gray-800 rounded-xl border border-gray-700">
-        <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Color Legend</h4>
+      <div className="bg-gray-800/40 rounded-xl p-5 border border-gray-700/50">
+        <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-4">Color Legend</h4>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-gray-600 rounded" />
-            <span className="text-gray-300">Default</span>
+            <div className="w-6 h-6 bg-gray-600 rounded-lg shadow-md" />
+            <span className="text-gray-300 text-sm">Default</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-blue-500 rounded" />
-            <span className="text-gray-300">Comparing</span>
+            <div className="w-6 h-6 bg-blue-500 rounded-lg shadow-md shadow-blue-500/50" />
+            <span className="text-gray-300 text-sm">Comparing</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-red-500 rounded" />
-            <span className="text-gray-300">Swapping</span>
+            <div className="w-6 h-6 bg-red-500 rounded-lg shadow-md shadow-red-500/50" />
+            <span className="text-gray-300 text-sm">Swapping</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-green-500 rounded" />
-            <span className="text-gray-300">Sorted</span>
+            <div className="w-6 h-6 bg-green-500 rounded-lg shadow-md shadow-green-500/50" />
+            <span className="text-gray-300 text-sm">Sorted</span>
           </div>
         </div>
       </div>

@@ -22,10 +22,10 @@ export function Bar({ item, maxValue, index }: BarProps) {
   return (
     <div
       className="flex-1 flex flex-col items-center justify-end"
-      style={{ minWidth: '8px' }}
+      style={{ minWidth: '8px', maxWidth: '24px' }}
     >
       <div
-        className={`w-full ${colorClass} transition-all duration-100 ease-out rounded-sm`}
+        className={`w-full ${colorClass} transition-all duration-100 ease-out rounded-t-lg shadow-lg`}
         style={{ 
           height: `${heightPercentage}%`,
           minHeight: '4px'

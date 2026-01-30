@@ -25,12 +25,12 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white flex flex-col">
       {/* Header */}
-      <header className="border-b border-blue-500/20">
-        <div className="max-w-[1600px] mx-auto px-8 py-8">
+      <header className="border-b border-gray-800/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-8 py-8">
           <div className="text-center">
-            <h1 className="text-5xl font-bold text-blue-500 mb-2">SortLab</h1>
+            <h1 className="text-6xl font-bold text-blue-500 mb-2 tracking-tight">SortLab</h1>
             <p className="text-lg text-gray-400">
               Interactive Sorting Algorithm Visualizer
             </p>
@@ -40,10 +40,10 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-8 py-12">
-        <div className="w-full max-w-[1600px]">
-          <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-8">
+        <div className="w-full max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-10">
             {/* Controls Sidebar */}
-            <aside className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
+            <aside className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 shadow-2xl shadow-blue-500/10">
               <Controls
                 algorithm={algorithm}
                 arraySize={arraySize}
@@ -59,7 +59,7 @@ export default function Home() {
             </aside>
 
             {/* Visualizer */}
-            <section className="flex items-center">
+            <section className="flex flex-col min-h-[700px]">
               <Visualizer array={array} message={currentMessage} />
             </section>
           </div>

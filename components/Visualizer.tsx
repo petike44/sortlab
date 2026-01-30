@@ -14,17 +14,17 @@ export function Visualizer({ array, message }: VisualizerProps) {
   return (
     <div className="w-full h-full flex flex-col">
       {/* Message Display */}
-      <div className="px-8 py-6 bg-gray-900 border-2 border-gray-800 rounded-t-2xl">
-        <p className="text-base text-gray-300 text-center">
+      <div className="px-8 py-5 bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-t-2xl shadow-lg">
+        <p className="text-base text-gray-300 text-center font-medium">
           {message || 'Select an algorithm and press Play to start'}
         </p>
       </div>
 
       {/* Visualization Area */}
-      <div className="flex-1 bg-gray-900 border-2 border-t-0 border-gray-800 rounded-b-2xl p-6 flex items-end justify-center gap-1 min-h-[600px]">
+      <div className="flex-1 bg-gray-900/60 backdrop-blur-xl border border-t-0 border-gray-700/50 rounded-b-2xl p-10 flex items-end justify-center gap-1 min-h-[600px] shadow-2xl shadow-blue-500/5">
         {array.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center">
-            <div className="text-gray-500 text-lg">Initializing...</div>
+            <div className="text-gray-400 text-lg">Initializing...</div>
           </div>
         ) : (
           <div className="w-full h-full flex items-end justify-center gap-1">
