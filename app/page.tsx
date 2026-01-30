@@ -28,10 +28,11 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white flex flex-col">
       {/* Header */}
       <header className="border-b border-gray-800/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold text-blue-500 mb-2 tracking-tight">SortLab</h1>
-            <p className="text-lg text-gray-400">
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="flex items-center justify-center gap-3">
+            <h1 className="text-2xl font-bold text-blue-500 tracking-tight">SortLab</h1>
+            <span className="text-sm text-gray-500">•</span>
+            <p className="text-sm text-gray-400">
               Interactive Sorting Algorithm Visualizer
             </p>
           </div>

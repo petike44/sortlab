@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { SortingAlgorithm, PlaybackState } from '@/types/sorting';
 import { ALGORITHMS } from '@/lib/algorithms';
 
@@ -27,26 +28,50 @@ export function Controls({
   onReset
 }: ControlsProps) {
   const currentAlgo = ALGORITHMS[algorithm];
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Algorithm Selection */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Algorithm Selection - Custom Dropdown */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <label className="block text-base font-bold text-gray-300 uppercase tracking-widest">
           Algorithm
         </label>
-        <select
-          value={algorithm}
-          onChange={(e) => onAlgorithmChange(e.target.value as SortingAlgorithm)}
-          className="w-full px-5 py-4 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-blue-500/30 hover:border-blue-500/50 rounded-xl text-white text-xl font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 cursor-pointer disabled:opacity-50 shadow-lg hover:shadow-blue-500/20"
-          disabled={playback.isPlaying}
-        >
-          {Object.values(ALGORITHMS).map((algo) => (
-            <option key={algo.id} value={algo.id}>
-              {algo.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => !playback.isPlaying && setIsDropdownOpen(!isDropdownOpen)}
+            className="w-full px-5 py-4 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-blue-500/30 hover:border-blue-500/50 rounded-xl text-white text-xl font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 cursor-pointer disabled:opacity-50 shadow-lg hover:shadow-blue-500/20 text-left flex justify-between items-center"
+            disabled={playback.isPlaying}
+          >
+            <span>{currentAlgo.name}</span>
+            <svg className={`w-5 h-5 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {isDropdownOpen && (
+            <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-blue-500/30 rounded-xl shadow-2xl shadow-black/50 overflow-hidden">
+              {Object.values(ALGORITHMS).map((algo) => (
+                <button
+                  key={algo.id}
+                  type="button"
+                  onClick={() => {
+                    onAlgorithmChange(algo.id as SortingAlgorithm);
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full px-5 py-3 text-left text-lg font-semibold transition-all duration-200 ${
+                    algorithm === algo.id
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white'
+                      : 'text-gray-200 hover:bg-gray-700'
+                  }`}
+                >
+                  {algo.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <p className="text-sm text-gray-400 leading-relaxed">{currentAlgo.description}</p>
       </div>
 
@@ -84,8 +109,7 @@ export function Controls({
           max="30"
           value={arraySize}
           onChange={(e) => onArraySizeChange(parseInt(e.target.value))}
-          style={{ accentColor: '#3b82f6' }}
-          className="w-full h-3 bg-blue-500/30 rounded-full cursor-pointer disabled:opacity-50"
+          className="slider-blue w-full h-3 rounded-full cursor-pointer disabled:opacity-50"
           disabled={playback.isPlaying}
         />
       </div>
@@ -104,8 +128,7 @@ export function Controls({
           max="100"
           value={playback.speed}
           onChange={(e) => onSpeedChange(parseInt(e.target.value))}
-          style={{ accentColor: '#06b6d4' }}
-          className="w-full h-3 bg-cyan-500/30 rounded-full cursor-pointer"
+          className="slider-cyan w-full h-3 rounded-full cursor-pointer"
         />
       </div>
 
@@ -171,31 +194,6 @@ export function Controls({
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent" />
-
-      {/* Legend */}
-      <div>
-        <h4 className="text-sm font-bold text-gray-300 uppercase tracking-widest" style={{ marginBottom: '14px' }}>Color Legend</h4>
-        <div className="bg-gray-800/40 rounded-xl p-4 border border-gray-700/40" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
-            <div className="w-6 h-6 bg-gray-500 rounded-lg shadow-md" />
-            <span className="text-gray-300 text-sm font-medium">Default</span>
-          </div>
-          <div className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-blue-900/30 transition-all duration-200">
-            <div className="w-6 h-6 bg-blue-500 rounded-lg shadow-md shadow-blue-500/50" />
-            <span className="text-gray-300 text-sm font-medium">Comparing</span>
-          </div>
-          <div className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-red-900/30 transition-all duration-200">
-            <div className="w-6 h-6 bg-red-500 rounded-lg shadow-md shadow-red-500/50" />
-            <span className="text-gray-300 text-sm font-medium">Swapping</span>
-          </div>
-          <div className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-green-900/30 transition-all duration-200">
-            <div className="w-6 h-6 bg-green-500 rounded-lg shadow-md shadow-green-500/50" />
-            <span className="text-gray-300 text-sm font-medium">Sorted</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
