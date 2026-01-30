@@ -2,6 +2,8 @@
  * Core types for SortLab sorting visualizer
  */
 
+export type AnimationStyle = 'classic' | 'bounce' | 'glow';
+
 export type ArrayItemState = 
   | 'default'
   | 'comparing' 

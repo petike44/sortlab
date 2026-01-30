@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useSortingVisualizer } from '@/hooks/useSortingVisualizer';
 import { Controls } from '@/components/Controls';
 import { Visualizer } from '@/components/Visualizer';
+import { AnimationStyle } from '@/types/sorting';
 
 export default function Home() {
+  const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('classic');
+  
   const {
     array,
     algorithm,
@@ -40,11 +44,11 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-8 py-12">
+      <main className="flex-1 flex items-center justify-center px-8 py-8">
         <div className="w-full max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8">
             {/* Controls Sidebar */}
-            <aside className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 shadow-2xl shadow-blue-500/10">
+            <aside className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 shadow-2xl shadow-blue-500/10">
               <Controls
                 algorithm={algorithm}
                 arraySize={arraySize}
@@ -60,8 +64,13 @@ export default function Home() {
             </aside>
 
             {/* Visualizer */}
-            <section className="flex flex-col min-h-[700px]">
-              <Visualizer array={array} message={currentMessage} />
+            <section className="flex flex-col min-h-[600px]">
+              <Visualizer 
+                array={array} 
+                message={currentMessage}
+                animationStyle={animationStyle}
+                onAnimationStyleChange={setAnimationStyle}
+              />
             </section>
           </div>
         </div>
