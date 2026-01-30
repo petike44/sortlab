@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { useSortingVisualizer } from '@/hooks/useSortingVisualizer';
 import { Controls } from '@/components/Controls';
 import { Visualizer } from '@/components/Visualizer';
-import { AnimationStyle } from '@/types/sorting';
+import { VisualizationMode } from '@/types/sorting';
 
 export default function Home() {
-  const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('classic');
+  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('bars');
   
   const {
     array,
@@ -68,8 +68,8 @@ export default function Home() {
               <Visualizer 
                 array={array} 
                 message={currentMessage}
-                animationStyle={animationStyle}
-                onAnimationStyleChange={setAnimationStyle}
+                visualizationMode={visualizationMode}
+                onVisualizationModeChange={setVisualizationMode}
               />
             </section>
           </div>

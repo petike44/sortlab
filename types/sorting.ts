@@ -2,7 +2,7 @@
  * Core types for SortLab sorting visualizer
  */
 
-export type AnimationStyle = 'classic' | 'bounce' | 'glow';
+export type VisualizationMode = 'bars' | 'boxes' | 'towers';
 
 export type ArrayItemState = 
   | 'default'
