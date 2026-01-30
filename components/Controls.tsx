@@ -29,16 +29,16 @@ export function Controls({
   const currentAlgo = ALGORITHMS[algorithm];
 
   return (
-    <div className="space-y-7">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Algorithm Selection */}
-      <div className="space-y-3">
-        <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wide">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <label className="block text-base font-bold text-gray-300 uppercase tracking-widest">
           Algorithm
         </label>
         <select
           value={algorithm}
           onChange={(e) => onAlgorithmChange(e.target.value as SortingAlgorithm)}
-          className="w-full px-4 py-3.5 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white text-base font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer disabled:opacity-50 hover:bg-gray-800/70 shadow-lg"
+          className="w-full px-5 py-4 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-blue-500/30 hover:border-blue-500/50 rounded-xl text-white text-xl font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 cursor-pointer disabled:opacity-50 shadow-lg hover:shadow-blue-500/20"
           disabled={playback.isPlaying}
         >
           {Object.values(ALGORITHMS).map((algo) => (
@@ -50,50 +50,53 @@ export function Controls({
         <p className="text-sm text-gray-400 leading-relaxed">{currentAlgo.description}</p>
       </div>
 
-      {/* Algorithm Info */}
-      <div className="bg-gray-800/40 rounded-xl p-5 border border-gray-700/50">
-        <div className="flex gap-8 text-sm">
-          <div>
-            <div className="text-gray-400 mb-1 text-xs uppercase tracking-wide">Time Complexity</div>
-            <div className="text-blue-400 font-mono font-bold text-base">
-              {currentAlgo.timeComplexity.average}
-            </div>
+      {/* Algorithm Info Box */}
+      <div className="flex gap-6 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-cyan-500/10 rounded-2xl p-5 border border-blue-500/20 shadow-xl">
+        <div className="flex-1 text-center">
+          <div className="text-xs text-gray-400 uppercase tracking-widest font-bold" style={{ marginBottom: '8px' }}>Time</div>
+          <div className="text-2xl font-mono font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            {currentAlgo.timeComplexity.average}
           </div>
-          <div>
-            <div className="text-gray-400 mb-1 text-xs uppercase tracking-wide">Space</div>
-            <div className="text-blue-400 font-mono font-bold text-base">
-              {currentAlgo.spaceComplexity}
-            </div>
+        </div>
+        <div className="w-px bg-gradient-to-b from-transparent via-blue-500/40 to-transparent" />
+        <div className="flex-1 text-center">
+          <div className="text-xs text-gray-400 uppercase tracking-widest font-bold" style={{ marginBottom: '8px' }}>Space</div>
+          <div className="text-2xl font-mono font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+            {currentAlgo.spaceComplexity}
           </div>
         </div>
       </div>
 
-      {/* Array Size */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-baseline">
-          <label className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+      {/* Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent" />
+
+      {/* Array Size Slider */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="flex justify-between items-center">
+          <label className="text-lg font-bold text-gray-200 uppercase tracking-widest">
             Array Size
           </label>
-          <span className="text-2xl font-bold text-blue-500">{arraySize}</span>
+          <span className="text-3xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent tabular-nums">{arraySize}</span>
         </div>
         <input
           type="range"
-          min="10"
-          max="100"
+          min="2"
+          max="30"
           value={arraySize}
           onChange={(e) => onArraySizeChange(parseInt(e.target.value))}
-          className="w-full h-2 bg-gray-800/50 rounded-full appearance-none cursor-pointer accent-blue-500 disabled:opacity-50"
+          style={{ accentColor: '#3b82f6' }}
+          className="w-full h-3 bg-blue-500/30 rounded-full cursor-pointer disabled:opacity-50"
           disabled={playback.isPlaying}
         />
       </div>
 
-      {/* Speed Control */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-baseline">
-          <label className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+      {/* Speed Slider */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="flex justify-between items-center">
+          <label className="text-lg font-bold text-gray-200 uppercase tracking-widest">
             Speed
           </label>
-          <span className="text-2xl font-bold text-blue-500">{playback.speed}%</span>
+          <span className="text-3xl font-black bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent tabular-nums">{playback.speed}%</span>
         </div>
         <input
           type="range"
@@ -101,34 +104,39 @@ export function Controls({
           max="100"
           value={playback.speed}
           onChange={(e) => onSpeedChange(parseInt(e.target.value))}
-          className="w-full h-2 bg-gray-800/50 rounded-full appearance-none cursor-pointer accent-blue-500"
+          style={{ accentColor: '#06b6d4' }}
+          className="w-full h-3 bg-cyan-500/30 rounded-full cursor-pointer"
         />
       </div>
 
+      {/* Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent" />
+
       {/* Playback Controls */}
-      <div className="space-y-4">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
         <button
           onClick={onTogglePlayback}
-          className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all shadow-lg ${
+          style={{ maxWidth: '280px' }}
+          className={`w-full py-5 rounded-xl font-bold text-xl transition-all duration-300 shadow-xl transform hover:scale-[1.02] active:scale-[0.98] ${
             playback.isPlaying
-              ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-red-500/30'
-              : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/30'
+              ? 'bg-gradient-to-r from-red-600 via-red-500 to-red-600 hover:from-red-500 hover:via-red-400 hover:to-red-500 text-white shadow-red-500/40'
+              : 'bg-gradient-to-r from-green-600 via-green-500 to-green-600 hover:from-green-500 hover:via-green-400 hover:to-green-500 text-white shadow-green-500/40'
           }`}
         >
           {playback.isPlaying ? '⏸ Pause' : '▶ Play'}
         </button>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div style={{ display: 'flex', gap: '10px', maxWidth: '280px', width: '100%' }}>
           <button
             onClick={onStepBackward}
-            className="px-4 py-3.5 bg-gray-800/50 hover:bg-gray-700/60 text-white rounded-xl font-semibold text-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-gray-700/50 shadow-lg"
+            className="flex-1 py-4 bg-gradient-to-br from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-30 border border-gray-500 hover:border-blue-500/50 shadow-lg transform hover:scale-[1.03] active:scale-[0.97]"
             disabled={playback.isPlaying || playback.currentStep === 0}
           >
             ← Back
           </button>
           <button
             onClick={onStepForward}
-            className="px-4 py-3.5 bg-gray-800/50 hover:bg-gray-700/60 text-white rounded-xl font-semibold text-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-gray-700/50 shadow-lg"
+            className="flex-1 py-4 bg-gradient-to-br from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-30 border border-gray-500 hover:border-blue-500/50 shadow-lg transform hover:scale-[1.03] active:scale-[0.97]"
             disabled={playback.isPlaying || playback.currentStep >= playback.totalSteps}
           >
             Forward →
@@ -137,24 +145,25 @@ export function Controls({
 
         <button
           onClick={onReset}
-          className="w-full px-5 py-3.5 bg-gray-800/50 hover:bg-gray-700/60 text-white rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-gray-700/50 shadow-lg"
+          style={{ maxWidth: '280px' }}
+          className="w-full py-4 bg-gradient-to-br from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-40 border border-orange-500 shadow-lg shadow-orange-500/30 transform hover:scale-[1.02] active:scale-[0.98]"
           disabled={playback.isPlaying}
         >
-          ↻ Reset
+          ↻ Reset Array
         </button>
       </div>
 
-      {/* Progress */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-baseline">
-          <span className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Progress</span>
-          <span className="text-sm font-mono text-gray-400">
+      {/* Progress Bar */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-bold text-gray-300 uppercase tracking-widest">Progress</span>
+          <span className="text-xs font-mono text-gray-400 bg-gray-800/70 px-3 py-1.5 rounded-lg tabular-nums">
             {playback.currentStep} / {playback.totalSteps}
           </span>
         </div>
-        <div className="w-full bg-gray-800/50 rounded-full h-2.5 overflow-hidden shadow-inner">
+        <div className="w-full bg-gradient-to-r from-gray-800 to-gray-900 rounded-full h-3 overflow-hidden border border-gray-700/50 shadow-inner">
           <div
-            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-300 shadow-lg shadow-blue-500/50"
+            className="bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 h-3 rounded-full transition-all duration-300 shadow-lg"
             style={{
               width: `${playback.totalSteps > 0 ? (playback.currentStep / playback.totalSteps) * 100 : 0}%`
             }}
@@ -162,25 +171,28 @@ export function Controls({
         </div>
       </div>
 
+      {/* Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent" />
+
       {/* Legend */}
-      <div className="bg-gray-800/40 rounded-xl p-5 border border-gray-700/50">
-        <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-4">Color Legend</h4>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-gray-600 rounded-lg shadow-md" />
-            <span className="text-gray-300 text-sm">Default</span>
+      <div>
+        <h4 className="text-sm font-bold text-gray-300 uppercase tracking-widest" style={{ marginBottom: '14px' }}>Color Legend</h4>
+        <div className="bg-gray-800/40 rounded-xl p-4 border border-gray-700/40" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
+            <div className="w-6 h-6 bg-gray-500 rounded-lg shadow-md" />
+            <span className="text-gray-300 text-sm font-medium">Default</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-blue-900/30 transition-all duration-200">
             <div className="w-6 h-6 bg-blue-500 rounded-lg shadow-md shadow-blue-500/50" />
-            <span className="text-gray-300 text-sm">Comparing</span>
+            <span className="text-gray-300 text-sm font-medium">Comparing</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-red-900/30 transition-all duration-200">
             <div className="w-6 h-6 bg-red-500 rounded-lg shadow-md shadow-red-500/50" />
-            <span className="text-gray-300 text-sm">Swapping</span>
+            <span className="text-gray-300 text-sm font-medium">Swapping</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-green-900/30 transition-all duration-200">
             <div className="w-6 h-6 bg-green-500 rounded-lg shadow-md shadow-green-500/50" />
-            <span className="text-gray-300 text-sm">Sorted</span>
+            <span className="text-gray-300 text-sm font-medium">Sorted</span>
           </div>
         </div>
       </div>

@@ -19,7 +19,7 @@ export default function Home() {
     changeSpeed,
     changeAlgorithm
   } = useSortingVisualizer({
-    initialSize: 50,
+    initialSize: 15,
     initialSpeed: 50,
     initialAlgorithm: 'bubble'
   });
