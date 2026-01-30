@@ -1,17 +1,49 @@
 # SortLab - Interactive Sorting Algorithm Visualizer
 
-A clean, educational web application for visualizing sorting algorithms with smooth animations and intuitive controls.
+A modern, educational web application for visualizing sorting algorithms with smooth animations, multiple visualization modes, and intuitive controls. Built with Next.js 15 and TypeScript.
 
-## Getting Started
+![SortLab Preview](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?style=flat-square&logo=tailwind-css)
+
+## ✨ Features
+
+- **5 Sorting Algorithms**: Bubble Sort, Selection Sort, Insertion Sort, Merge Sort, Quick Sort
+- **3 Visualization Modes**:
+  - 📊 **Bars** - Classic bar chart visualization
+  - 🔢 **Boxes** - Number cards that rearrange
+  - 🏙️ **Towers** - 3D city skyline effect
+- **Full Playback Control**: Play, pause, step forward/backward, reset
+- **Adjustable Speed**: Control animation speed from 1% to 100%
+- **Dynamic Array Size**: Visualize with 2-30 elements
+- **Color-Coded States**: Visual feedback for comparing, swapping, and sorted elements
+- **Responsive Design**: Fully optimized for desktop, tablet, and mobile
+- **Modern UI**: Dark theme with gradient effects, smooth animations, and glass morphism
+
+## 🚀 Getting Started
 
 ```bash
+# Install dependencies
 npm install
+
+# Run development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view SortLab.
 
-## Architecture Overview
+## 📱 Screenshots
+
+### Desktop View
+The main interface features a control panel on the left and the visualization area on the right.
+
+### Mobile View
+On mobile devices, the visualization appears at the top with controls below for easy one-handed operation.
+
+## 🏗️ Architecture Overview
 
 ### Core Philosophy
 - **Generator-based state management**: Each algorithm is implemented as a JavaScript generator that yields discrete sorting steps
@@ -38,15 +70,27 @@ sortlab/
 ├── hooks/
 │   └── useSortingVisualizer.ts # Main state management hook
 ├── components/
-│   ├── Bar.tsx                 # Individual bar visualization
+│   ├── Bar.tsx                 # Visualization element (bars/boxes/towers)
 │   ├── Controls.tsx            # Control panel UI
 │   └── Visualizer.tsx          # Main visualization canvas
 └── app/
     ├── page.tsx                # Main application page
-    └── globals.css             # Global styles
+    ├── layout.tsx              # Root layout
+    └── globals.css             # Global styles & animations
 ```
 
-## Key Design Decisions
+## 🎨 Visualization Modes
+
+### 📊 Bars (Classic)
+Traditional bar chart where each element's height represents its value. Great for seeing the overall pattern of sorting.
+
+### 🔢 Boxes
+Square cards displaying the actual numbers. Elements scale and rotate when being swapped. Ideal for understanding the exact values being compared.
+
+### 🏙️ Towers
+3D building/tower visualization with window patterns. Creates a "city skyline" effect where sorting arranges buildings from shortest to tallest.
+
+## 🎯 Key Design Decisions
 
 ### 1. Generator-Based Algorithm Implementation
 
@@ -84,12 +128,14 @@ Custom hook orchestrating:
 
 ### 3. Color-Coded Visual States
 
-- `default`: Gray - Inactive elements
-- `comparing`: Blue - Elements being compared
-- `swapping`: Red - Elements being swapped
-- `sorted`: Green - Elements in final position
-- `pivot`: Yellow - Pivot element (Quick Sort)
-- `partitioned`: Purple - Partitioned sections (Merge/Quick Sort)
+| State | Color | Description |
+|-------|-------|-------------|
+| `default` | Gray | Inactive elements |
+| `comparing` | Blue | Elements being compared |
+| `swapping` | Red | Elements being swapped |
+| `sorted` | Green | Elements in final position |
+| `pivot` | Purple | Pivot element (Quick Sort) |
+| `partitioned` | Blue | Partitioned sections |
 
 ### 4. Animation Strategy
 
@@ -99,17 +145,17 @@ Two-layer approach:
 
 requestAnimationFrame controls timing while CSS handles interpolation.
 
-## Algorithms Implemented
+## 📊 Algorithms Implemented
 
-| Algorithm | Time (Avg) | Time (Worst) | Space | Strategy |
-|-----------|------------|--------------|-------|----------|
-| Bubble Sort | O(n²) | O(n²) | O(1) | Adjacent swaps |
-| Selection Sort | O(n²) | O(n²) | O(1) | Find minimum |
-| Insertion Sort | O(n²) | O(n²) | O(1) | Build sorted array |
-| Merge Sort | O(n log n) | O(n log n) | O(n) | Divide and conquer |
-| Quick Sort | O(n log n) | O(n²) | O(log n) | Partition around pivot |
+| Algorithm | Time (Best) | Time (Avg) | Time (Worst) | Space | Strategy |
+|-----------|-------------|------------|--------------|-------|----------|
+| Bubble Sort | O(n) | O(n²) | O(n²) | O(1) | Adjacent swaps |
+| Selection Sort | O(n²) | O(n²) | O(n²) | O(1) | Find minimum |
+| Insertion Sort | O(n) | O(n²) | O(n²) | O(1) | Build sorted array |
+| Merge Sort | O(n log n) | O(n log n) | O(n log n) | O(n) | Divide and conquer |
+| Quick Sort | O(n log n) | O(n log n) | O(n²) | O(log n) | Partition around pivot |
 
-## Extending the Project
+## 🔧 Extending the Project
 
 ### Adding a New Algorithm
 
@@ -141,29 +187,36 @@ export const ALGORITHMS = {
 
 3. Add to `getSortingGenerator()` factory function
 
-### Adding New Visual States
+### Adding a New Visualization Mode
 
 1. Add type to `types/sorting.ts`:
 ```typescript
-export type ArrayItemState = 'default' | 'mynewstate' | ...;
+export type VisualizationMode = 'bars' | 'boxes' | 'towers' | 'mymode';
 ```
 
-2. Add color in `components/Bar.tsx`:
+2. Add rendering logic in `components/Bar.tsx`:
 ```typescript
-const STATE_COLORS = {
-  mynewstate: 'bg-custom-color'
-};
+if (visualizationMode === 'mymode') {
+  return <div>Custom visualization</div>;
+}
 ```
 
-## Technical Stack
+3. Register in `components/Visualizer.tsx` VISUALIZATION_MODES array
+
+## 🛠️ Technical Stack
 
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS 4
 - **Animation**: requestAnimationFrame + CSS transitions
 - **State**: React hooks (custom `useSortingVisualizer`)
+- **Build**: Turbopack (development)
 
-## License
+## 📄 License
 
 MIT
+
+---
+
+Made with ❤️ for learning and education
 
