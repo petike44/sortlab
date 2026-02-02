@@ -77,6 +77,12 @@ export function Visualizer({ array, message, visualizationMode, onVisualizationM
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-gray-400 text-lg">Initializing...</div>
           </div>
+        ) : visualizationMode === 'towers' && typeof window !== 'undefined' && window.innerWidth < 640 ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-gray-400 text-center text-base sm:text-lg px-4">
+              🏗️ Tower mode not available on mobile yet
+            </div>
+          </div>
         ) : (
           <div className={`w-full flex items-end justify-center ${visualizationMode === 'boxes' ? 'flex-wrap gap-2 sm:gap-3 items-center' : 'gap-0.5 sm:gap-1 h-[200px] sm:h-[300px] lg:h-[400px]'}`}>
             {array.map((item, index) => (
