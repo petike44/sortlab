@@ -1,7 +1,7 @@
 import { SortingAlgorithm, AlgorithmMetadata, ArrayItem, SortingGenerator } from '@/types/sorting';
 import { bubbleSort } from './bubbleSort';
 import { selectionSort } from './selectionSort';
-import { insertionSort } from './insertionSort';
+import { heapSort } from './insertionSort';
 import { mergeSort } from './mergeSort';
 import { quickSort } from './quickSort';
 
@@ -30,14 +30,14 @@ export const ALGORITHMS: Record<SortingAlgorithm, AlgorithmMetadata> = {
   },
   insertion: {
     id: 'insertion',
-    name: 'Insertion Sort',
+    name: 'Heap Sort',
     timeComplexity: {
-      best: 'O(n)',
-      average: 'O(n²)',
-      worst: 'O(n²)'
+      best: 'O(n log n)',
+      average: 'O(n log n)',
+      worst: 'O(n log n)'
     },
     spaceComplexity: 'O(1)',
-    description: 'Builds sorted array one element at a time'
+    description: 'Builds a max heap and extracts elements in sorted order'
   },
   merge: {
     id: 'merge',
@@ -73,7 +73,7 @@ export function getSortingGenerator(
     case 'selection':
       return selectionSort(items);
     case 'insertion':
-      return insertionSort(items);
+      return heapSort(items);
     case 'merge':
       return mergeSort(items);
     case 'quick':
