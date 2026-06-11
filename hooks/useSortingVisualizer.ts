@@ -1,9 +1,21 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { ArrayItem, SortingAlgorithm, SortingStep, PlaybackState } from '@/types/sorting';
-import { getSortingGenerator } from '@/lib/algorithms';
-import { generateRandomArray, resetArrayStates } from '@/lib/utils/arrayUtils';
+import {
+  ArrayItem,
+  SortingAlgorithm,
+  SortingStep,
+  PlaybackState,
+  ArrayPreset,
+  SortStats,
+} from '@/types/sorting';
+import { generateAllSteps } from '@/lib/algorithms';
+import {
+  generatePresetArray,
+  resetArrayStates,
+  getMaxArraySize,
+  getRecommendedSize,
+} from '@/lib/utils/arrayUtils';
 
 interface UseSortingVisualizerOptions {
   initialSize?: number;
@@ -11,266 +23,227 @@ interface UseSortingVisualizerOptions {
   initialAlgorithm?: SortingAlgorithm;
 }
 
+function computeStats(steps: SortingStep[]): SortStats {
+  let comparisons = 0;
+  let swaps = 0;
+  for (const step of steps) {
+    if (step.comparingIndices?.length) comparisons++;
+    if (step.swappingIndices?.length) swaps++;
+  }
+  return { comparisons, swaps };
+}
+
+function speedToDelay(speed: number): number {
+  return Math.max(16, 520 - speed * 5);
+}
+
 export function useSortingVisualizer({
-  initialSize = 50,
-  initialSpeed = 50,
-  initialAlgorithm = 'bubble'
+  initialSize = 20,
+  initialSpeed = 55,
+  initialAlgorithm = 'bubble',
 }: UseSortingVisualizerOptions = {}) {
   const [array, setArray] = useState<ArrayItem[]>([]);
   const [algorithm, setAlgorithm] = useState<SortingAlgorithm>(initialAlgorithm);
   const [arraySize, setArraySize] = useState(initialSize);
+  const [preset, setPreset] = useState<ArrayPreset>('random');
   const [playback, setPlayback] = useState<PlaybackState>({
     isPlaying: false,
     speed: initialSpeed,
     currentStep: 0,
-    totalSteps: 0
+    totalSteps: 0,
   });
-  const [currentMessage, setCurrentMessage] = useState<string>('');
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [stats, setStats] = useState<SortStats>({ comparisons: 0, swaps: 0 });
+  const [isReady, setIsReady] = useState(false);
 
-  // Initialize array after mount to avoid hydration mismatch
-  useEffect(() => {
-    setArray(generateRandomArray(initialSize));
-  }, []);
-
-  // Refs for animation control
-  const generatorRef = useRef<Generator<SortingStep, void, unknown> | null>(null);
   const stepsRef = useRef<SortingStep[]>([]);
-  const animationFrameRef = useRef<number | null>(null);
-  const lastStepTimeRef = useRef<number>(0);
+  const rafRef = useRef<number | null>(null);
+  const lastTickRef = useRef(0);
+  const playingRef = useRef(false);
+  const stepIndexRef = useRef(0);
+  const speedRef = useRef(initialSpeed);
+  const tickRef = useRef<(timestamp: number) => void>(() => {});
 
-  /**
-   * Initialize a new sorting process
-   */
-  const initializeSorting = useCallback(() => {
-    const items = resetArrayStates(array);
-    generatorRef.current = getSortingGenerator(algorithm, items);
-    stepsRef.current = [];
-    
-    // Pre-generate all steps for step-through mode
-    const generator = getSortingGenerator(algorithm, items);
-    const steps: SortingStep[] = [];
-    let result = generator.next();
-    
-    while (!result.done) {
-      steps.push(result.value);
-      result = generator.next();
-    }
-    
-    stepsRef.current = steps;
-    
-    setPlayback(prev => ({
-      ...prev,
-      currentStep: 0,
-      totalSteps: steps.length
-    }));
-    
-    setArray(items);
-    setCurrentMessage('Ready to sort');
-  }, [array, algorithm]);
+  const applyStep = useCallback((index: number) => {
+    const step = stepsRef.current[index];
+    if (!step) return;
+    setArray(step.array);
+    setCurrentMessage(step.message || '');
+    stepIndexRef.current = index;
+    setPlayback((prev) => ({ ...prev, currentStep: index }));
+  }, []);
 
-  /**
-   * Execute one step of the sorting algorithm
-   */
-  const stepForward = useCallback(() => {
-    if (!generatorRef.current) {
-      initializeSorting();
-      return;
-    }
-
-    const result = generatorRef.current.next();
-    
-    if (!result.done) {
-      const step = result.value;
-      setArray(step.array);
-      setCurrentMessage(step.message || '');
-      setPlayback(prev => ({
+  const buildSteps = useCallback(
+    (items: ArrayItem[], algo: SortingAlgorithm = algorithm) => {
+      const clean = resetArrayStates(items);
+      const steps = generateAllSteps(algo, clean);
+      stepsRef.current = steps;
+      setStats(computeStats(steps));
+      setArray(clean);
+      setPlayback((prev) => ({
         ...prev,
-        currentStep: prev.currentStep + 1
+        currentStep: 0,
+        totalSteps: steps.length,
+        isPlaying: false,
       }));
-    } else {
-      setPlayback(prev => ({ ...prev, isPlaying: false }));
-    }
-  }, [initializeSorting]);
+      stepIndexRef.current = 0;
+      setCurrentMessage(steps.length ? 'Ready — press Play' : 'No steps generated');
+      setIsReady(steps.length > 0);
+      return steps;
+    },
+    [algorithm]
+  );
 
-  /**
-   * Step backward (requires pre-generated steps)
-   */
-  const stepBackward = useCallback(() => {
-    setPlayback(prev => {
-      if (prev.currentStep > 0) {
-        const newStep = prev.currentStep - 1;
-        const step = stepsRef.current[newStep];
-        
-        if (step) {
-          setArray(step.array);
-          setCurrentMessage(step.message || '');
-        }
-        
-        return { ...prev, currentStep: newStep };
-      }
-      return prev;
-    });
+  useEffect(() => {
+    const items = generatePresetArray(initialSize, 'random');
+    buildSteps(items);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only init
   }, []);
 
-  /**
-   * Jump to specific step
-   */
-  const jumpToStep = useCallback((stepIndex: number) => {
-    if (stepIndex >= 0 && stepIndex < stepsRef.current.length) {
-      const step = stepsRef.current[stepIndex];
-      setArray(step.array);
-      setCurrentMessage(step.message || '');
-      setPlayback(prev => ({ ...prev, currentStep: stepIndex }));
-    }
+  const stopPlayback = useCallback(() => {
+    playingRef.current = false;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    setPlayback((prev) => ({ ...prev, isPlaying: false }));
   }, []);
 
-  /**
-   * Animation loop using requestAnimationFrame
-   */
-  const animate = useCallback((timestamp: number) => {
-    if (!playback.isPlaying) return;
+  tickRef.current = (timestamp: number) => {
+    if (!playingRef.current) return;
 
-    const elapsed = timestamp - lastStepTimeRef.current;
-    const stepDelay = 1000 - (playback.speed * 10); // Convert speed to delay
+    if (lastTickRef.current === 0) lastTickRef.current = timestamp;
+    const elapsed = timestamp - lastTickRef.current;
 
-    if (elapsed >= stepDelay) {
-      lastStepTimeRef.current = timestamp;
-      
-      if (playback.currentStep < stepsRef.current.length) {
-        const step = stepsRef.current[playback.currentStep];
-        setArray(step.array);
-        setCurrentMessage(step.message || '');
-        setPlayback(prev => ({
-          ...prev,
-          currentStep: prev.currentStep + 1
-        }));
+    if (elapsed >= speedToDelay(speedRef.current)) {
+      lastTickRef.current = timestamp;
+      const next = stepIndexRef.current + 1;
+
+      if (next < stepsRef.current.length) {
+        applyStep(next);
       } else {
-        setPlayback(prev => ({ ...prev, isPlaying: false }));
+        stopPlayback();
         return;
       }
     }
 
-    animationFrameRef.current = requestAnimationFrame(animate);
-  }, [playback.isPlaying, playback.speed, playback.currentStep]);
+    rafRef.current = requestAnimationFrame((t) => tickRef.current(t));
+  };
 
-  /**
-   * Play/pause control
-   */
+  const startPlayback = useCallback(() => {
+    if (stepsRef.current.length === 0) {
+      buildSteps(array);
+    }
+
+    if (stepIndexRef.current >= stepsRef.current.length) {
+      stepIndexRef.current = 0;
+      applyStep(0);
+    }
+
+    playingRef.current = true;
+    lastTickRef.current = 0;
+    setPlayback((prev) => ({ ...prev, isPlaying: true }));
+    rafRef.current = requestAnimationFrame((t) => tickRef.current(t));
+  }, [array, applyStep, buildSteps]);
+
   const togglePlayback = useCallback(() => {
-    if (!playback.isPlaying) {
-      // Starting animation
-      if (playback.currentStep === 0 || stepsRef.current.length === 0) {
-        // Need to initialize
-        const items = resetArrayStates(array);
-        const generator = getSortingGenerator(algorithm, items);
-        const steps: SortingStep[] = [];
-        let result = generator.next();
-        
-        while (!result.done) {
-          steps.push(result.value);
-          result = generator.next();
-        }
-        
-        stepsRef.current = steps;
-        setArray(items);
-        setPlayback(prev => ({
-          ...prev,
-          currentStep: 0,
-          totalSteps: steps.length,
-          isPlaying: true
-        }));
-      } else {
-        // Resume
-        setPlayback(prev => ({ ...prev, isPlaying: true }));
-      }
-      lastStepTimeRef.current = performance.now();
+    if (playingRef.current) {
+      stopPlayback();
     } else {
-      // Pausing
-      setPlayback(prev => ({ ...prev, isPlaying: false }));
+      startPlayback();
     }
-  }, [playback.isPlaying, playback.currentStep, array, algorithm]);
+  }, [startPlayback, stopPlayback]);
 
-  /**
-   * Reset everything
-   */
+  const stepForward = useCallback(() => {
+    stopPlayback();
+    if (stepsRef.current.length === 0) {
+      buildSteps(array);
+      return;
+    }
+    const next = Math.min(stepIndexRef.current + 1, stepsRef.current.length - 1);
+    if (next !== stepIndexRef.current) applyStep(next);
+  }, [array, applyStep, buildSteps, stopPlayback]);
+
+  const stepBackward = useCallback(() => {
+    stopPlayback();
+    const prev = Math.max(stepIndexRef.current - 1, 0);
+    applyStep(prev);
+  }, [applyStep, stopPlayback]);
+
+  const jumpToStep = useCallback(
+    (stepIndex: number) => {
+      stopPlayback();
+      const clamped = Math.max(0, Math.min(stepIndex, stepsRef.current.length - 1));
+      applyStep(clamped);
+    },
+    [applyStep, stopPlayback]
+  );
+
   const reset = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    
-    generatorRef.current = null;
+    stopPlayback();
     stepsRef.current = [];
-    
-    setPlayback({
-      isPlaying: false,
-      speed: playback.speed,
-      currentStep: 0,
-      totalSteps: 0
-    });
-    
-    setArray(generateRandomArray(arraySize));
-    setCurrentMessage('');
-  }, [arraySize, playback.speed]);
+    const items = generatePresetArray(arraySize, preset);
+    buildSteps(items);
+  }, [arraySize, preset, buildSteps, stopPlayback]);
 
-  /**
-   * Change array size
-   */
-  const changeArraySize = useCallback((size: number) => {
-    setArraySize(size);
-    setArray(generateRandomArray(size));
-    generatorRef.current = null;
-    stepsRef.current = [];
-    setPlayback(prev => ({
-      ...prev,
-      isPlaying: false,
-      currentStep: 0,
-      totalSteps: 0
-    }));
-  }, []);
+  const changeArraySize = useCallback(
+    (size: number) => {
+      stopPlayback();
+      const max = getMaxArraySize(algorithm);
+      const clamped = Math.max(2, Math.min(size, max));
+      setArraySize(clamped);
+      stepsRef.current = [];
+      const items = generatePresetArray(clamped, preset);
+      buildSteps(items);
+    },
+    [algorithm, preset, buildSteps, stopPlayback]
+  );
 
-  /**
-   * Change speed
-   */
   const changeSpeed = useCallback((speed: number) => {
-    setPlayback(prev => ({ ...prev, speed }));
+    speedRef.current = speed;
+    setPlayback((prev) => ({ ...prev, speed }));
   }, []);
 
-  /**
-   * Change algorithm
-   */
-  const changeAlgorithm = useCallback((newAlgorithm: SortingAlgorithm) => {
-    setAlgorithm(newAlgorithm);
-    generatorRef.current = null;
-    stepsRef.current = [];
-    setPlayback(prev => ({
-      ...prev,
-      isPlaying: false,
-      currentStep: 0,
-      totalSteps: 0
-    }));
-    setArray(prev => resetArrayStates(prev));
-  }, []);
+  const changeAlgorithm = useCallback(
+    (newAlgorithm: SortingAlgorithm) => {
+      stopPlayback();
+      setAlgorithm(newAlgorithm);
+      const max = getMaxArraySize(newAlgorithm);
+      const newSize = Math.min(arraySize, max);
+      if (newSize !== arraySize) setArraySize(newSize);
+      stepsRef.current = [];
+      const items = generatePresetArray(newSize, preset);
+      buildSteps(items, newAlgorithm);
+    },
+    [arraySize, preset, buildSteps, stopPlayback]
+  );
 
-  // Animation loop effect
+  const changePreset = useCallback(
+    (newPreset: ArrayPreset) => {
+      stopPlayback();
+      setPreset(newPreset);
+      stepsRef.current = [];
+      const items = generatePresetArray(arraySize, newPreset);
+      buildSteps(items);
+    },
+    [arraySize, buildSteps, stopPlayback]
+  );
+
   useEffect(() => {
-    if (playback.isPlaying) {
-      lastStepTimeRef.current = performance.now();
-      animationFrameRef.current = requestAnimationFrame(animate);
-    }
-
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [playback.isPlaying, animate]);
+  }, []);
 
   return {
     array,
     algorithm,
     arraySize,
+    preset,
     playback,
     currentMessage,
+    stats,
+    isReady,
+    maxArraySize: getMaxArraySize(algorithm),
+    recommendedSize: getRecommendedSize(algorithm),
     togglePlayback,
     stepForward,
     stepBackward,
@@ -278,6 +251,7 @@ export function useSortingVisualizer({
     reset,
     changeArraySize,
     changeSpeed,
-    changeAlgorithm
+    changeAlgorithm,
+    changePreset,
   };
 }

@@ -1,197 +1,233 @@
-import { useState } from 'react';
-import { SortingAlgorithm, PlaybackState } from '@/types/sorting';
+import { SortingAlgorithm, PlaybackState, ArrayPreset, SortStats } from '@/types/sorting';
 import { ALGORITHMS } from '@/lib/algorithms';
+import { AlgorithmPicker } from './AlgorithmPicker';
 
 interface ControlsProps {
   algorithm: SortingAlgorithm;
   arraySize: number;
+  maxArraySize: number;
+  preset: ArrayPreset;
   playback: PlaybackState;
+  stats: SortStats;
   onAlgorithmChange: (algorithm: SortingAlgorithm) => void;
   onArraySizeChange: (size: number) => void;
+  onPresetChange: (preset: ArrayPreset) => void;
   onSpeedChange: (speed: number) => void;
   onTogglePlayback: () => void;
   onStepForward: () => void;
   onStepBackward: () => void;
+  onJumpToStep: (step: number) => void;
   onReset: () => void;
 }
+
+const PRESETS: { id: ArrayPreset; label: string }[] = [
+  { id: 'random', label: 'Random' },
+  { id: 'reversed', label: 'Reversed' },
+  { id: 'nearly-sorted', label: 'Nearly sorted' },
+  { id: 'few-unique', label: 'Few unique' },
+];
 
 export function Controls({
   algorithm,
   arraySize,
+  maxArraySize,
+  preset,
   playback,
+  stats,
   onAlgorithmChange,
   onArraySizeChange,
+  onPresetChange,
   onSpeedChange,
   onTogglePlayback,
   onStepForward,
   onStepBackward,
-  onReset
+  onJumpToStep,
+  onReset,
 }: ControlsProps) {
-  const currentAlgo = ALGORITHMS[algorithm];
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const meta = ALGORITHMS[algorithm];
+  const busy = playback.isPlaying;
+  const atStart = playback.currentStep === 0;
+  const atEnd = playback.totalSteps > 0 && playback.currentStep >= playback.totalSteps - 1;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {/* Algorithm Selection - Custom Dropdown */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <label className="block text-sm sm:text-base font-bold text-gray-300 uppercase tracking-widest">
+    <div className="flex flex-col gap-4 sm:gap-5">
+      {/* Algorithm picker */}
+      <section>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
           Algorithm
-        </label>
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => !playback.isPlaying && setIsDropdownOpen(!isDropdownOpen)}
-            className="w-full px-3 sm:px-5 py-3 sm:py-4 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-blue-500/30 hover:border-blue-500/50 rounded-xl text-white text-lg sm:text-xl font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 cursor-pointer disabled:opacity-50 shadow-lg hover:shadow-blue-500/20 text-left flex justify-between items-center"
-            disabled={playback.isPlaying}
-          >
-            <span>{currentAlgo.name}</span>
-            <svg className={`w-5 h-5 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {isDropdownOpen && (
-            <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-blue-500/30 rounded-xl shadow-2xl shadow-black/50 overflow-hidden">
-              {Object.values(ALGORITHMS).map((algo) => (
-                <button
-                  key={algo.id}
-                  type="button"
-                  onClick={() => {
-                    onAlgorithmChange(algo.id as SortingAlgorithm);
-                    setIsDropdownOpen(false);
-                  }}
-                  className={`w-full px-4 sm:px-5 py-2.5 sm:py-3 text-left text-base sm:text-lg font-semibold transition-all duration-200 ${
-                    algorithm === algo.id
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white'
-                      : 'text-gray-200 hover:bg-gray-700'
-                  }`}
-                >
-                  {algo.name}
-                </button>
-              ))}
-            </div>
+        </h2>
+        <AlgorithmPicker
+          algorithm={algorithm}
+          disabled={busy}
+          onChange={onAlgorithmChange}
+        />
+      </section>
+
+      {/* Info card */}
+      <section className="rounded-xl border border-white/8 bg-white/[0.03] p-3 sm:p-4">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">{meta.emoji}</span>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-sm sm:text-base">{meta.name}</h3>
+            <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{meta.description}</p>
+            {meta.funFact && (
+              <p className="text-[11px] text-violet-300/80 mt-2 italic">{meta.funFact}</p>
+            )}
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/6">
+          <div className="text-center">
+            <div className="text-[10px] text-slate-500 uppercase">Avg time</div>
+            <div className="text-sm font-mono font-semibold text-cyan-400">{meta.timeComplexity.average}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-[10px] text-slate-500 uppercase">Space</div>
+            <div className="text-sm font-mono font-semibold text-violet-400">{meta.spaceComplexity}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-[10px] text-slate-500 uppercase">Type</div>
+            <div className="text-sm font-semibold capitalize text-slate-300">{meta.category}</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      {playback.totalSteps > 0 && (
+        <section className="flex gap-3">
+          <div className="flex-1 rounded-lg bg-white/[0.04] border border-white/6 px-3 py-2 text-center">
+            <div className="text-[10px] text-slate-500 uppercase">Comparisons</div>
+            <div className="text-lg font-mono font-bold text-violet-300">{stats.comparisons}</div>
+          </div>
+          <div className="flex-1 rounded-lg bg-white/[0.04] border border-white/6 px-3 py-2 text-center">
+            <div className="text-[10px] text-slate-500 uppercase">Swaps</div>
+            <div className="text-lg font-mono font-bold text-rose-300">{stats.swaps}</div>
+          </div>
+        </section>
+      )}
+
+      {/* Presets */}
+      <section>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
+          Array pattern
+        </h2>
+        <div className="flex flex-wrap gap-1.5">
+          {PRESETS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              disabled={busy}
+              onClick={() => onPresetChange(p.id)}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                preset === p.id
+                  ? 'bg-violet-600/80 text-white'
+                  : 'btn-ghost'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Sliders */}
+      <section className="space-y-4">
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+              Array size
+            </label>
+            <span className="text-lg font-mono font-bold text-cyan-400 tabular-nums">{arraySize}</span>
+          </div>
+          <input
+            type="range"
+            min={2}
+            max={maxArraySize}
+            value={arraySize}
+            disabled={busy}
+            onChange={(e) => onArraySizeChange(parseInt(e.target.value, 10))}
+          />
+          {algorithm === 'bogo' && (
+            <p className="text-[10px] text-amber-400/80 mt-1">Bogo sort capped at {maxArraySize} elements — for your sanity</p>
           )}
         </div>
-        <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">{currentAlgo.description}</p>
-      </div>
-
-      {/* Algorithm Info Box */}
-      <div className="flex gap-4 sm:gap-6 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-cyan-500/10 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-blue-500/20 shadow-xl">
-        <div className="flex-1 text-center">
-          <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest font-bold" style={{ marginBottom: '4px' }}>Time</div>
-          <div className="text-xl sm:text-2xl font-mono font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            {currentAlgo.timeComplexity.average}
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+              Speed
+            </label>
+            <span className="text-lg font-mono font-bold text-violet-400 tabular-nums">{playback.speed}%</span>
           </div>
+          <input
+            type="range"
+            min={1}
+            max={100}
+            value={playback.speed}
+            onChange={(e) => onSpeedChange(parseInt(e.target.value, 10))}
+          />
         </div>
-        <div className="w-px bg-gradient-to-b from-transparent via-blue-500/40 to-transparent" />
-        <div className="flex-1 text-center">
-          <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest font-bold" style={{ marginBottom: '4px' }}>Space</div>
-          <div className="text-xl sm:text-2xl font-mono font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-            {currentAlgo.spaceComplexity}
-          </div>
-        </div>
-      </div>
+      </section>
 
-      {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent" />
-
-      {/* Array Size Slider */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <div className="flex justify-between items-center">
-          <label className="text-sm sm:text-base lg:text-lg font-bold text-gray-200 uppercase tracking-widest">
-            Array Size
-          </label>
-          <span className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent tabular-nums">{arraySize}</span>
-        </div>
-        <input
-          type="range"
-          min="2"
-          max="30"
-          value={arraySize}
-          onChange={(e) => onArraySizeChange(parseInt(e.target.value))}
-          className="slider-blue w-full h-3 rounded-full cursor-pointer disabled:opacity-50 touch-pan-y"
-          disabled={playback.isPlaying}
-        />
-      </div>
-
-      {/* Speed Slider */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <div className="flex justify-between items-center">
-          <label className="text-sm sm:text-base lg:text-lg font-bold text-gray-200 uppercase tracking-widest">
-            Speed
-          </label>
-          <span className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent tabular-nums">{playback.speed}%</span>
-        </div>
-        <input
-          type="range"
-          min="1"
-          max="100"
-          value={playback.speed}
-          onChange={(e) => onSpeedChange(parseInt(e.target.value))}
-          className="slider-cyan w-full h-3 rounded-full cursor-pointer touch-pan-y"
-        />
-      </div>
-
-      {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent" />
-
-      {/* Playback Controls */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+      {/* Playback */}
+      <section className="space-y-2">
         <button
+          type="button"
           onClick={onTogglePlayback}
-          className={`w-full max-w-[280px] py-4 sm:py-5 rounded-xl font-bold text-lg sm:text-xl transition-all duration-300 shadow-xl transform hover:scale-[1.02] active:scale-[0.98] ${
-            playback.isPlaying
-              ? 'bg-gradient-to-r from-red-600 via-red-500 to-red-600 hover:from-red-500 hover:via-red-400 hover:to-red-500 text-white shadow-red-500/40'
-              : 'bg-gradient-to-r from-green-600 via-green-500 to-green-600 hover:from-green-500 hover:via-green-400 hover:to-green-500 text-white shadow-green-500/40'
+          className={`btn-primary w-full py-3.5 text-sm sm:text-base ${
+            playback.isPlaying ? '!bg-gradient-to-r !from-rose-600 !to-orange-600' : ''
           }`}
         >
           {playback.isPlaying ? '⏸ Pause' : '▶ Play'}
         </button>
 
-        <div className="flex gap-2 sm:gap-3 w-full max-w-[280px]">
+        <div className="grid grid-cols-2 gap-2">
           <button
+            type="button"
             onClick={onStepBackward}
-            className="flex-1 py-3 sm:py-4 bg-gradient-to-br from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 disabled:opacity-30 border border-gray-500 hover:border-blue-500/50 shadow-lg transform hover:scale-[1.03] active:scale-[0.97]"
-            disabled={playback.isPlaying || playback.currentStep === 0}
+            disabled={busy || atStart}
+            className="btn-ghost py-2.5 text-sm"
           >
-            ← Back
+            ← Step back
           </button>
           <button
+            type="button"
             onClick={onStepForward}
-            className="flex-1 py-3 sm:py-4 bg-gradient-to-br from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 disabled:opacity-30 border border-gray-500 hover:border-blue-500/50 shadow-lg transform hover:scale-[1.03] active:scale-[0.97]"
-            disabled={playback.isPlaying || playback.currentStep >= playback.totalSteps}
+            disabled={busy || atEnd}
+            className="btn-ghost py-2.5 text-sm"
           >
-            Forward →
+            Step fwd →
           </button>
         </div>
 
         <button
+          type="button"
           onClick={onReset}
-          className="w-full max-w-[280px] py-3 sm:py-4 bg-gradient-to-br from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 disabled:opacity-40 border border-orange-500 shadow-lg shadow-orange-500/30 transform hover:scale-[1.02] active:scale-[0.98]"
-          disabled={playback.isPlaying}
+          disabled={busy}
+          className="btn-ghost w-full py-2.5 text-sm text-amber-300 border-amber-500/20 hover:border-amber-500/40"
         >
-          ↻ Reset Array
+          ↻ New array
         </button>
-      </div>
+      </section>
 
-      {/* Progress Bar */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-bold text-gray-300 uppercase tracking-widest">Progress</span>
-          <span className="text-xs font-mono text-gray-400 bg-gray-800/70 px-3 py-1.5 rounded-lg tabular-nums">
-            {playback.currentStep} / {playback.totalSteps}
-          </span>
-        </div>
-        <div className="w-full bg-gradient-to-r from-gray-800 to-gray-900 rounded-full h-3 overflow-hidden border border-gray-700/50 shadow-inner">
-          <div
-            className="bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 h-3 rounded-full transition-all duration-300 shadow-lg"
-            style={{
-              width: `${playback.totalSteps > 0 ? (playback.currentStep / playback.totalSteps) * 100 : 0}%`
-            }}
+      {/* Scrubber */}
+      {playback.totalSteps > 0 && (
+        <section>
+          <div className="flex justify-between text-[10px] text-slate-500 mb-1.5 font-mono tabular-nums">
+            <span>Progress</span>
+            <span>
+              {playback.currentStep} / {playback.totalSteps}
+            </span>
+          </div>
+          <input
+            type="range"
+            className="progress-scrubber w-full"
+            min={0}
+            max={Math.max(playback.totalSteps - 1, 0)}
+            value={playback.currentStep}
+            disabled={busy}
+            onChange={(e) => onJumpToStep(parseInt(e.target.value, 10))}
           />
-        </div>
-      </div>
-
+        </section>
+      )}
     </div>
   );
 }

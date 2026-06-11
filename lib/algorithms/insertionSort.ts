@@ -1,69 +1,55 @@
-import { ArrayItem, SortingStep, SortingGenerator } from '@/types/sorting';
+import { ArrayItem, SortingGenerator } from '@/types/sorting';
+import { completeStep, withStates } from './helpers';
 
-/**
- * Heap Sort Generator
- * Sorts array using a binary heap data structure
- */
-export function* heapSort(items: ArrayItem[]): SortingGenerator {
+export function* insertionSort(items: ArrayItem[]): SortingGenerator {
   const arr = [...items];
   const n = arr.length;
 
-  // Build max heap
-  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-    yield* heapify(arr, n, i, false);
-  }
+  for (let i = 1; i < n; i++) {
+    const key = arr[i];
+    let j = i - 1;
 
-  // Extract elements from heap
-  for (let i = n - 1; i > 0; i--) {
-    // Swap root with last element
     yield {
-      array: arr.map((item, idx) => ({
-        ...item,
-        state: idx === 0 || idx === i ? 'swapping' : idx > i ? 'sorted' : 'default'
-      })),
-      comparingIndices: [0, i],
-      message: `Swapping root ${arr[0].value} with ${arr[i].value}`
+      array: withStates(arr, (idx) =>
+        idx === i ? 'active' : idx < i ? 'sorted' : 'default'
+      ),
+      message: `Inserting ${key.value} into sorted prefix`,
     };
 
-    [arr[0], arr[i]] = [arr[i], arr[0]];
+    while (j >= 0 && arr[j].value > key.value) {
+      yield {
+        array: withStates(arr, (idx) =>
+          idx === j || idx === j + 1
+            ? 'comparing'
+            : idx < j
+              ? 'sorted'
+              : 'default'
+        ),
+        comparingIndices: [j, j + 1],
+        message: `${arr[j].value} > ${key.value} — shift right`,
+      };
 
-    // Heapify reduced heap
-    yield* heapify(arr, i, 0, true);
-  }
+      arr[j + 1] = arr[j];
 
-  // Final state
-  yield {
-    array: arr.map(item => ({ ...item, state: 'sorted' })),
-    sortedIndices: arr.map((_, i) => i),
-    message: 'Sorting complete!'
-  };
-}
+      yield {
+        array: withStates(arr, (idx) =>
+          idx === j + 1 ? 'swapping' : idx <= j ? 'sorted' : 'default'
+        ),
+        swappingIndices: [j, j + 1],
+        message: `Shifted ${arr[j + 1].value} to index ${j + 1}`,
+      };
 
-function* heapify(arr: ArrayItem[], n: number, i: number, showSorted: boolean): SortingGenerator {
-  let largest = i;
-  const left = 2 * i + 1;
-  const right = 2 * i + 2;
+      j--;
+    }
 
-  if (left < n && arr[left].value > arr[largest].value) {
-    largest = left;
-  }
+    arr[j + 1] = key;
 
-  if (right < n && arr[right].value > arr[largest].value) {
-    largest = right;
-  }
-
-  if (largest !== i) {
     yield {
-      array: arr.map((item, idx) => ({
-        ...item,
-        state: idx === i || idx === largest ? 'swapping' : showSorted && idx >= n ? 'sorted' : 'default'
-      })),
-      comparingIndices: [i, largest],
-      message: `Swapping ${arr[i].value} with ${arr[largest].value}`
+      array: withStates(arr, (idx) => (idx <= i ? 'sorted' : 'default')),
+      sortedIndices: Array.from({ length: i + 1 }, (_, k) => k),
+      message: `${key.value} placed at index ${j + 1}`,
     };
-
-    [arr[i], arr[largest]] = [arr[largest], arr[i]];
-
-    yield* heapify(arr, n, largest, showSorted);
   }
+
+  yield completeStep(arr);
 }

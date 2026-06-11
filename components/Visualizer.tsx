@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrayItem, VisualizationMode } from '@/types/sorting';
-import { Bar } from './Bar';
+import { SortElement } from './SortElement';
 
 interface VisualizerProps {
   array: ArrayItem[];
@@ -10,87 +10,84 @@ interface VisualizerProps {
   onVisualizationModeChange: (mode: VisualizationMode) => void;
 }
 
-const VISUALIZATION_MODES: { id: VisualizationMode; name: string; icon: string; description: string }[] = [
-  { id: 'bars', name: 'Bars', icon: '📊', description: 'Classic bar chart visualization' },
-  { id: 'boxes', name: 'Boxes', icon: '🔢', description: 'Number boxes that rearrange' },
-  { id: 'towers', name: 'Towers', icon: '🏙️', description: '3D city towers visualization' }
+const MODES: { id: VisualizationMode; label: string; icon: string }[] = [
+  { id: 'bars', label: 'Bars', icon: '▮' },
+  { id: 'boxes', label: 'Boxes', icon: '▦' },
+  { id: 'dots', label: 'Dots', icon: '●' },
 ];
 
-export function Visualizer({ array, message, visualizationMode, onVisualizationModeChange }: VisualizerProps) {
-  const maxValue = array.length > 0 ? Math.max(...array.map(item => item.value)) : 100;
+const LEGEND = [
+  { color: 'bg-slate-500', label: 'Idle' },
+  { color: 'bg-violet-500', label: 'Compare' },
+  { color: 'bg-rose-500', label: 'Swap' },
+  { color: 'bg-emerald-500', label: 'Sorted' },
+  { color: 'bg-fuchsia-500', label: 'Pivot' },
+  { color: 'bg-cyan-500', label: 'Active' },
+];
+
+export function Visualizer({
+  array,
+  message,
+  visualizationMode,
+  onVisualizationModeChange,
+}: VisualizerProps) {
+  const maxValue = array.length > 0 ? Math.max(...array.map((i) => i.value)) : 100;
 
   return (
-    <div className="w-full h-full flex flex-col">
-      {/* Top Bar with Visualization Mode Selector */}
-      <div className="px-3 sm:px-6 py-3 sm:py-4 bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-t-xl sm:rounded-t-2xl shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-        {/* Message */}
-        <p className="text-xs sm:text-sm text-gray-300 font-medium flex-1 order-2 sm:order-1">
-          {message || 'Press Play to start'}
+    <div className="glass-panel flex flex-col h-full min-h-[280px] sm:min-h-[360px] lg:min-h-[480px] overflow-hidden animate-fade-up">
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 sm:px-5 py-3 border-b border-white/6">
+        <p className="text-xs sm:text-sm text-slate-300 font-medium truncate order-2 sm:order-1">
+          {message || 'Pick an algorithm and press Play'}
         </p>
-        
-        {/* Visualization Mode Selector */}
-        <div className="flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto justify-end">
-          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold hidden sm:inline">View:</span>
-          <div className="flex gap-1 bg-gray-800/80 rounded-lg p-1">
-            {VISUALIZATION_MODES.map((mode) => (
-              <button
-                key={mode.id}
-                onClick={() => onVisualizationModeChange(mode.id)}
-                className={`px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-1.5 ${
-                  visualizationMode === mode.id
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                }`}
-                title={mode.description}
-              >
-                <span>{mode.icon}</span>
-                <span className="hidden sm:inline">{mode.name}</span>
-              </button>
-            ))}
+        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1 order-1 sm:order-2 self-end sm:self-auto">
+          {MODES.map((mode) => (
+            <button
+              key={mode.id}
+              type="button"
+              onClick={() => onVisualizationModeChange(mode.id)}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                visualizationMode === mode.id
+                  ? 'bg-violet-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white hover:bg-white/8'
+              }`}
+            >
+              <span className="mr-1">{mode.icon}</span>
+              <span className="hidden xs:inline sm:inline">{mode.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-3 py-2 border-b border-white/4 bg-white/[0.02]">
+        {LEGEND.map((item) => (
+          <div key={item.label} className="flex items-center gap-1.5">
+            <div className={`w-2 h-2 rounded-full ${item.color}`} />
+            <span className="text-[10px] text-slate-500">{item.label}</span>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Color Legend - Inline */}
-      <div className="px-3 sm:px-6 py-1.5 sm:py-2 bg-gray-800/40 border-x border-gray-700/50 flex items-center justify-center gap-3 sm:gap-6 flex-wrap">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-gray-500 rounded" />
-          <span className="text-[10px] sm:text-xs text-gray-400">Default</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-500 rounded" />
-          <span className="text-[10px] sm:text-xs text-gray-400">Comparing</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded" />
-          <span className="text-[10px] sm:text-xs text-gray-400">Swapping</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded" />
-          <span className="text-[10px] sm:text-xs text-gray-400">Sorted</span>
-        </div>
-      </div>
-
-      {/* Visualization Area */}
-      <div className={`flex-1 bg-gray-900/60 backdrop-blur-xl border border-t-0 border-gray-700/50 rounded-b-xl sm:rounded-b-2xl p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-[250px] sm:min-h-[350px] lg:min-h-[500px] shadow-2xl shadow-blue-500/5`}>
+      {/* Canvas */}
+      <div className="flex-1 flex items-center justify-center p-3 sm:p-5 lg:p-8">
         {array.length === 0 ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-gray-400 text-lg">Initializing...</div>
-          </div>
-        ) : visualizationMode === 'towers' && typeof window !== 'undefined' && window.innerWidth < 640 ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-gray-400 text-center text-base sm:text-lg px-4">
-              🏗️ Tower mode not available on mobile yet
-            </div>
-          </div>
+          <div className="text-slate-500 text-sm">Loading array…</div>
         ) : (
-          <div className={`w-full flex items-end justify-center ${visualizationMode === 'boxes' ? 'flex-wrap gap-2 sm:gap-3 items-center' : 'gap-0.5 sm:gap-1 h-[200px] sm:h-[300px] lg:h-[400px]'}`}>
-            {array.map((item, index) => (
-              <Bar
+          <div
+            className={`w-full h-full max-h-[320px] sm:max-h-[400px] lg:max-h-[460px] flex items-end justify-center ${
+              visualizationMode === 'boxes'
+                ? 'flex-wrap gap-2 sm:gap-3 items-center content-center'
+                : visualizationMode === 'dots'
+                  ? 'gap-1 sm:gap-1.5 items-end'
+                  : 'gap-0.5 sm:gap-1 h-full'
+            }`}
+          >
+            {array.map((item) => (
+              <SortElement
                 key={item.id}
                 item={item}
                 maxValue={maxValue}
-                index={index}
                 visualizationMode={visualizationMode}
                 totalItems={array.length}
               />

@@ -8,73 +8,93 @@ import { VisualizationMode } from '@/types/sorting';
 
 export default function Home() {
   const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('bars');
-  
+
   const {
     array,
     algorithm,
     arraySize,
+    maxArraySize,
+    preset,
     playback,
     currentMessage,
+    stats,
     togglePlayback,
     stepForward,
     stepBackward,
+    jumpToStep,
     reset,
     changeArraySize,
     changeSpeed,
-    changeAlgorithm
+    changeAlgorithm,
+    changePreset,
   } = useSortingVisualizer({
-    initialSize: 15,
-    initialSpeed: 50,
-    initialAlgorithm: 'bubble'
+    initialSize: 20,
+    initialSpeed: 55,
+    initialAlgorithm: 'bubble',
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white flex flex-col">
-      {/* Header */}
-      <header className="border-b border-gray-800/50 backdrop-blur-sm sticky top-0 z-40 bg-gray-950/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3">
-          <div className="flex items-center justify-center gap-2 sm:gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold text-blue-500 tracking-tight">SortLab</h1>
-            <span className="text-sm text-gray-500 hidden sm:inline">•</span>
-            <p className="text-xs sm:text-sm text-gray-400 hidden sm:block">
-              Interactive Sorting Algorithm Visualizer
-            </p>
+    <div className="app-bg min-h-screen flex flex-col">
+      <header className="sticky top-0 z-50 border-b border-white/6 bg-[#07080f]/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-lg font-bold shadow-lg shadow-violet-500/25">
+              S
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+                SortLab
+              </h1>
+              <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block">
+                10 algorithms + one chaotic wildcard
+              </p>
+            </div>
+          </div>
+          <div className="hidden md:flex items-center gap-2 text-xs text-slate-500">
+            <span className="px-2 py-1 rounded-md bg-white/5 border border-white/8">Generator-based</span>
+            <span className="px-2 py-1 rounded-md bg-white/5 border border-white/8">Step scrubbing</span>
+            <span className="px-2 py-1 rounded-md bg-white/5 border border-white/8">Fully responsive</span>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-start lg:items-center justify-center px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        <div className="w-full max-w-7xl">
-          <div className="flex flex-col lg:grid lg:grid-cols-[340px_1fr] xl:grid-cols-[380px_1fr] gap-4 sm:gap-6 lg:gap-8">
-            {/* Controls Sidebar */}
-            <aside className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 shadow-2xl shadow-blue-500/10 order-2 lg:order-1">
-              <Controls
-                algorithm={algorithm}
-                arraySize={arraySize}
-                playback={playback}
-                onAlgorithmChange={changeAlgorithm}
-                onArraySizeChange={changeArraySize}
-                onSpeedChange={changeSpeed}
-                onTogglePlayback={togglePlayback}
-                onStepForward={stepForward}
-                onStepBackward={stepBackward}
-                onReset={reset}
-              />
-            </aside>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 py-4 sm:py-6 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(300px,380px)_1fr] gap-4 sm:gap-6 lg:gap-8">
+          {/* Visualizer first on mobile */}
+          <section className="order-1 lg:order-2 min-h-[300px]">
+            <Visualizer
+              array={array}
+              message={currentMessage}
+              visualizationMode={visualizationMode}
+              onVisualizationModeChange={setVisualizationMode}
+            />
+          </section>
 
-            {/* Visualizer */}
-            <section className="flex flex-col min-h-[300px] sm:min-h-[400px] lg:min-h-[600px] order-1 lg:order-2">
-              <Visualizer 
-                array={array} 
-                message={currentMessage}
-                visualizationMode={visualizationMode}
-                onVisualizationModeChange={setVisualizationMode}
-              />
-            </section>
-          </div>
+          <aside className="order-2 lg:order-1 glass-panel p-4 sm:p-5 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            <Controls
+              algorithm={algorithm}
+              arraySize={arraySize}
+              maxArraySize={maxArraySize}
+              preset={preset}
+              playback={playback}
+              stats={stats}
+              onAlgorithmChange={changeAlgorithm}
+              onArraySizeChange={changeArraySize}
+              onPresetChange={changePreset}
+              onSpeedChange={changeSpeed}
+              onTogglePlayback={togglePlayback}
+              onStepForward={stepForward}
+              onStepBackward={stepBackward}
+              onJumpToStep={jumpToStep}
+              onReset={reset}
+            />
+          </aside>
         </div>
       </main>
+
+      <footer className="border-t border-white/6 py-4 text-center text-[11px] text-slate-600">
+        Built for learning — try 🎲 Bogo Sort at your own risk
+      </footer>
     </div>
   );
 }

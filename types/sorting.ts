@@ -2,15 +2,17 @@
  * Core types for SortLab sorting visualizer
  */
 
-export type VisualizationMode = 'bars' | 'boxes' | 'towers';
+export type VisualizationMode = 'bars' | 'boxes' | 'dots';
 
-export type ArrayItemState = 
+export type ArrayItemState =
   | 'default'
-  | 'comparing' 
+  | 'comparing'
   | 'swapping'
   | 'sorted'
   | 'pivot'
-  | 'partitioned';
+  | 'partitioned'
+  | 'active'
+  | 'highlighted';
 
 export interface ArrayItem {
   id: string;
@@ -18,12 +20,22 @@ export interface ArrayItem {
   state: ArrayItemState;
 }
 
-export type SortingAlgorithm = 
+export type SortingAlgorithm =
   | 'bubble'
   | 'selection'
   | 'insertion'
+  | 'heap'
   | 'merge'
-  | 'quick';
+  | 'quick'
+  | 'shell'
+  | 'cocktail'
+  | 'counting'
+  | 'gnome'
+  | 'bogo';
+
+export type AlgorithmCategory = 'comparison' | 'non-comparison' | 'chaos';
+
+export type ArrayPreset = 'random' | 'reversed' | 'nearly-sorted' | 'few-unique';
 
 export interface SortingStep {
   array: ArrayItem[];
@@ -37,6 +49,8 @@ export interface SortingStep {
 export interface AlgorithmMetadata {
   id: SortingAlgorithm;
   name: string;
+  emoji: string;
+  category: AlgorithmCategory;
   timeComplexity: {
     best: string;
     average: string;
@@ -44,13 +58,19 @@ export interface AlgorithmMetadata {
   };
   spaceComplexity: string;
   description: string;
+  funFact?: string;
 }
 
 export type SortingGenerator = Generator<SortingStep, void, unknown>;
 
 export interface PlaybackState {
   isPlaying: boolean;
-  speed: number; // ms per step
+  speed: number;
   currentStep: number;
   totalSteps: number;
+}
+
+export interface SortStats {
+  comparisons: number;
+  swaps: number;
 }
