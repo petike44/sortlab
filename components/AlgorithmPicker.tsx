@@ -1,3 +1,6 @@
+'use client';
+
+import { motion } from 'motion/react';
 import { SortingAlgorithm } from '@/types/sorting';
 import { ALGORITHM_ORDER, ALGORITHMS } from '@/lib/algorithms';
 
@@ -21,15 +24,26 @@ export function AlgorithmPicker({ algorithm, disabled, onChange }: AlgorithmPick
             type="button"
             disabled={disabled}
             onClick={() => onChange(id)}
-            className={`algo-card text-left p-2.5 sm:p-3 rounded-xl border bg-white/[0.03] disabled:opacity-40 disabled:cursor-not-allowed ${
+            className={`algo-card text-left p-2.5 sm:p-3 rounded-xl border bg-white/[0.025] disabled:opacity-40 disabled:cursor-not-allowed ${
               isActive ? `active ${isChaos ? 'chaos' : ''}` : 'border-white/8'
             }`}
           >
-            <div className="flex items-center gap-2">
+            {isActive && (
+              <motion.span
+                layoutId="algo-selection"
+                className={`pointer-events-none absolute inset-0 rounded-xl ring-2 ${
+                  isChaos ? 'ring-amber-400/80' : 'ring-violet-400/80'
+                }`}
+                transition={{ type: 'spring', stiffness: 500, damping: 36 }}
+              />
+            )}
+            <div className="relative flex items-center gap-2">
               <span className="text-lg sm:text-xl leading-none">{meta.emoji}</span>
               <div className="min-w-0 flex-1">
                 <div className="text-xs sm:text-sm font-semibold truncate">{meta.name}</div>
-                <div className="text-[10px] text-slate-500 font-mono">{meta.timeComplexity.average}</div>
+                <div className="text-[10px] text-slate-500 font-mono">
+                  {meta.timeComplexity.average}
+                </div>
               </div>
             </div>
           </button>
