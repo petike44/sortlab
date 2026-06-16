@@ -106,15 +106,26 @@ export function Visualizer({
                     : 'gap-0.5 sm:gap-1 items-stretch h-full'
               }`}
             >
-              {array.map((item) => (
-                <SortElement
-                  key={item.id}
-                  item={item}
-                  maxValue={maxValue}
-                  visualizationMode={visualizationMode}
-                  totalItems={array.length}
-                />
-              ))}
+              {(() => {
+                // Item ids are globally unique, but some algorithms (e.g. counting
+                // sort) transiently render an item and its placed copy in the same
+                // frame. De-dupe keys so React/Framer layout stays valid; unique ids
+                // keep their identity so swap-slide animations still work.
+                const seen = new Set<string>();
+                return array.map((item, idx) => {
+                  const key = seen.has(item.id) ? `${item.id}__${idx}` : item.id;
+                  seen.add(item.id);
+                  return (
+                    <SortElement
+                      key={key}
+                      item={item}
+                      maxValue={maxValue}
+                      visualizationMode={visualizationMode}
+                      totalItems={array.length}
+                    />
+                  );
+                });
+              })()}
             </div>
           </LayoutGroup>
         )}
