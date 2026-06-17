@@ -34,7 +34,7 @@ export function SettingsSheet({ open, onClose, children }: SettingsSheetProps) {
             type="button"
             aria-label="Close settings"
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-[var(--ink)]/30 backdrop-blur-[2px]"
           />
 
           {/* Sheet */}
@@ -51,12 +51,12 @@ export function SettingsSheet({ open, onClose, children }: SettingsSheetProps) {
             onDragEnd={(_, info) => {
               if (info.offset.y > 120 || info.velocity.y > 600) onClose();
             }}
-            className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto glass-panel rounded-b-none rounded-t-3xl border-b-0 px-4 pt-3 pb-8"
+            className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto bg-[var(--card)] border-t border-[var(--line)] rounded-t-3xl px-4 pt-3 pb-8 shadow-[0_-12px_40px_-20px_rgba(23,23,27,0.4)]"
           >
-            <div className="sticky top-0 -mx-4 -mt-3 px-4 pt-3 pb-3 bg-gradient-to-b from-[#14172480] to-transparent backdrop-blur-md z-10 flex flex-col items-center">
-              <span className="h-1.5 w-12 rounded-full bg-white/20" />
+            <div className="sticky top-0 -mx-4 -mt-3 px-4 pt-3 pb-3 bg-[var(--card)] z-10 flex flex-col items-center border-b border-[var(--line)]">
+              <span className="h-1.5 w-12 rounded-full bg-[var(--line-strong)]" />
               <div className="mt-3 w-full flex items-center justify-between">
-                <h2 className="text-sm font-semibold">Settings</h2>
+                <h2 className="text-sm font-semibold font-display">Settings</h2>
                 <button
                   type="button"
                   onClick={onClose}

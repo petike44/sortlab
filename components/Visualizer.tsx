@@ -1,13 +1,15 @@
 'use client';
 
 import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
-import { ArrayItem, VisualizationMode } from '@/types/sorting';
+import { ArrayItem, VisualizationMode, SortStats } from '@/types/sorting';
 import { SortElement } from './SortElement';
 
 interface VisualizerProps {
   array: ArrayItem[];
   message: string;
   visualizationMode: VisualizationMode;
+  stats: SortStats;
+  showStats: boolean;
   onVisualizationModeChange: (mode: VisualizationMode) => void;
 }
 
@@ -18,38 +20,41 @@ const MODES: { id: VisualizationMode; label: string; icon: string }[] = [
 ];
 
 const LEGEND = [
-  { color: 'bg-slate-500', label: 'Idle' },
-  { color: 'bg-violet-500', label: 'Compare' },
-  { color: 'bg-rose-500', label: 'Swap' },
-  { color: 'bg-emerald-500', label: 'Sorted' },
-  { color: 'bg-fuchsia-500', label: 'Pivot' },
-  { color: 'bg-cyan-500', label: 'Active' },
+  { color: 'var(--st-idle)', label: 'Idle' },
+  { color: 'var(--st-compare)', label: 'Compare' },
+  { color: 'var(--st-swap)', label: 'Swap' },
+  { color: 'var(--st-sorted)', label: 'Sorted' },
+  { color: 'var(--st-pivot)', label: 'Pivot' },
+  { color: 'var(--st-active)', label: 'Active' },
 ];
 
 export function Visualizer({
   array,
   message,
   visualizationMode,
+  stats,
+  showStats,
   onVisualizationModeChange,
 }: VisualizerProps) {
   const maxValue = array.length > 0 ? Math.max(...array.map((i) => i.value)) : 100;
 
   return (
-    <div className="glass-panel flex flex-col h-full min-h-[300px] sm:min-h-[400px] lg:min-h-[520px] overflow-hidden">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-3 px-3 sm:px-5 py-3 border-b border-white/6">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={message}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.18 }}
-            className="text-xs sm:text-sm text-slate-300 font-medium truncate min-w-0"
-          >
-            {message || 'Pick an algorithm and press Play'}
-          </motion.p>
-        </AnimatePresence>
+    <div className="card flex flex-col h-full min-h-[300px] sm:min-h-[400px] overflow-hidden">
+      {/* Frame header — legend + mode switcher */}
+      <div className="flex items-center justify-between gap-3 px-3 sm:px-5 py-2.5 border-b border-[var(--line)]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
+          {LEGEND.map((item) => (
+            <div key={item.label} className="flex items-center gap-1.5">
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="text-[10px] sm:text-[11px] text-[var(--ink-muted)]">
+                {item.label}
+              </span>
+            </div>
+          ))}
+        </div>
 
         <LayoutGroup id="viz-mode">
           <div className="segmented shrink-0">
@@ -66,13 +71,13 @@ export function Visualizer({
                   {active && (
                     <motion.span
                       layoutId="viz-mode-pill"
-                      className="absolute inset-0 rounded-[9px] bg-gradient-to-r from-violet-600 to-cyan-600"
+                      className="absolute inset-0 rounded-[7px] bg-[var(--accent)]"
                       transition={{ type: 'spring', stiffness: 500, damping: 36 }}
                     />
                   )}
                   <span className="relative flex items-center gap-1.5">
                     <span>{mode.icon}</span>
-                    <span className="hidden xs:inline sm:inline">{mode.label}</span>
+                    <span className="hidden sm:inline">{mode.label}</span>
                   </span>
                 </button>
               );
@@ -81,24 +86,14 @@ export function Visualizer({
         </LayoutGroup>
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-3 py-2 border-b border-white/4 bg-white/[0.015]">
-        {LEGEND.map((item) => (
-          <div key={item.label} className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${item.color}`} />
-            <span className="text-[10px] text-slate-500">{item.label}</span>
-          </div>
-        ))}
-      </div>
-
       {/* Canvas */}
-      <div className="flex-1 flex items-center justify-center p-3 sm:p-5 lg:p-8">
+      <div className="canvas-grid flex-1 flex items-center justify-center p-3 sm:p-5 lg:p-8">
         {array.length === 0 ? (
-          <div className="text-slate-500 text-sm animate-pulse">Loading array…</div>
+          <div className="text-[var(--ink-faint)] text-sm animate-pulse">Loading array…</div>
         ) : (
           <LayoutGroup>
             <div
-              className={`w-full h-full max-h-[340px] sm:max-h-[440px] lg:max-h-[500px] flex justify-center ${
+              className={`w-full h-full max-h-[340px] sm:max-h-[460px] lg:max-h-[560px] flex justify-center ${
                 visualizationMode === 'boxes'
                   ? 'flex-wrap gap-2 sm:gap-3 items-center content-center'
                   : visualizationMode === 'dots'
@@ -128,6 +123,33 @@ export function Visualizer({
               })()}
             </div>
           </LayoutGroup>
+        )}
+      </div>
+
+      {/* Status caption + live stats */}
+      <div className="flex items-center justify-between gap-3 px-3 sm:px-5 py-2.5 border-t border-[var(--line)] bg-[var(--paper-2)]">
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={message}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.18 }}
+            className="text-xs sm:text-sm text-[var(--ink-muted)] font-medium truncate min-w-0"
+          >
+            {message || 'Pick an algorithm and press Play'}
+          </motion.p>
+        </AnimatePresence>
+
+        {showStats && (
+          <div className="flex items-center gap-2 shrink-0 font-mono text-[11px] tabular-nums">
+            <span className="chip-mono">
+              <span className="text-[var(--st-compare)]">●</span> {stats.comparisons} comp
+            </span>
+            <span className="chip-mono">
+              <span className="text-[var(--st-swap)]">●</span> {stats.swaps} swaps
+            </span>
+          </div>
         )}
       </div>
     </div>
