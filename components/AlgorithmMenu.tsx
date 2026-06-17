@@ -64,7 +64,7 @@ export function AlgorithmMenu({ algorithm, disabled, onChange }: AlgorithmMenuPr
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-            className="card absolute right-0 z-50 mt-2 w-[min(92vw,420px)] p-3 origin-top-right"
+            className="card absolute right-0 z-50 mt-2 w-[min(92vw,440px)] p-3 origin-top-right max-h-[70vh] overflow-y-auto"
           >
             <p className="section-label mb-2.5 px-0.5">Choose algorithm</p>
             <AlgorithmPicker algorithm={algorithm} disabled={disabled} onChange={handleChange} />

@@ -12,7 +12,7 @@ interface AlgorithmPickerProps {
 
 export function AlgorithmPicker({ algorithm, disabled, onChange }: AlgorithmPickerProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2">
       {ALGORITHM_ORDER.map((id) => {
         const meta = ALGORITHMS[id];
         const isActive = algorithm === id;
@@ -40,7 +40,7 @@ export function AlgorithmPicker({ algorithm, disabled, onChange }: AlgorithmPick
             <div className="relative flex items-center gap-2">
               <span className="text-lg sm:text-xl leading-none">{meta.emoji}</span>
               <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm font-semibold truncate text-[var(--ink)]">
+                <div className="text-xs sm:text-sm font-semibold text-[var(--ink)]">
                   {meta.name}
                 </div>
                 <div className="text-[10px] text-[var(--ink-faint)] font-mono">

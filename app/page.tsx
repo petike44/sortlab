@@ -43,7 +43,7 @@ export default function Home() {
   return (
     <div className="app-bg flex flex-col h-dvh">
       {/* Top bar */}
-      <header className="shrink-0 border-b border-[var(--line)] bg-[var(--paper)]/80 backdrop-blur-sm">
+      <header className="relative z-50 shrink-0 border-b border-[var(--line)] bg-[var(--paper)]/80 backdrop-blur-sm">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-2.5 min-w-0">
             <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--ink)]">
@@ -97,9 +97,9 @@ export default function Home() {
             />
           </div>
 
-          {/* Desktop inline params */}
-          <div className="hidden lg:block w-px h-12 bg-[var(--line)] shrink-0" />
-          <div className="hidden lg:block shrink-0">
+          {/* Desktop inline params — wide screens only; narrower laptops use the Tune sheet */}
+          <div className="hidden xl:block w-px h-12 bg-[var(--line)] shrink-0" />
+          <div className="hidden xl:block shrink-0">
             <ParamControls
               variant="dock"
               algorithm={algorithm}

@@ -71,7 +71,7 @@ export function PlaybackControls({
         <button
           type="button"
           onClick={onOpenSettings}
-          className="btn-ghost lg:hidden h-11 px-3 text-sm ml-auto shrink-0"
+          className="btn-ghost xl:hidden h-11 px-3 text-sm ml-auto shrink-0"
         >
           ⚙ Tune
         </button>
